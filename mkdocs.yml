@@ -1,0 +1,16 @@
+site_name: OpenSimRL Documentation
+site_url: https://github.com/aribrin/opensimrl
+repo_url: https://github.com/aribrin/opensimrl
+
+theme:
+  name: readthedocs
+
+nav:
+  - Home: index.md
+  - Tutorials: tutorials.md
+  - API Reference: api_reference.md
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - codehilite
