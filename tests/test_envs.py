@@ -5,9 +5,9 @@ from opensimrl.envs.gridworld import SimpleGridWorld
 def test_gridworld_initialization():
     """Test environment initializes correctly"""
 
-    env = SimpleGridWorld(grid_size=5)
+    env = SimpleGridWorld(size=5)
 
-    assert env.grid_size == 5
+    assert env.size == 5
     assert env.action_space.n == 4
     assert env.observation_space.shape == (2,)
 
@@ -29,13 +29,13 @@ def test_gridworld_actions():
 
     # Move to goal (1,1)
     env.step(3)  # Right
-    observation, reward, done, truncated, info = env.step(3)  # Down
+    observation, reward, done, truncated, info = env.step(1)  # Down
 
     assert observation[0] == 1 # moved right
     assert reward == -0.01 # step penalty
     assert not done
 
-def test_gridworld_reaching_goal():
+def test_gridworld_goal():
     """Test reaching goal gives correct reward and ends episode"""
 
     env = SimpleGridWorld(size=2) # 2x2 grid for quick test
@@ -43,7 +43,7 @@ def test_gridworld_reaching_goal():
 
     # Move to goal (1,1)
     env.step(3)  # Right
-    observation, reward, done, truncated, info = env.step(3)  # Down
+    observation, reward, done, truncated, info = env.step(1)  # Down
 
     assert reward == 1.0
     assert done
@@ -63,5 +63,4 @@ def test_gridworld_out_of_bounds():
     observation, reward, done, truncated, info = env.step(2)  # left
     assert np.array_equal(observation, [0, 0]) # Still at origin
 
-    
-    
+
