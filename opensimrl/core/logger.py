@@ -1,12 +1,14 @@
 import wandb
 import matplotlib.pyplot as plt
-import numpy as np
+# import numpy as np
 
 
 class ExperimentLogger:
     """Handles logging to W&B and local files."""
 
-    def __init__(self, project_name="opensimrl", experiment_name=None, config=None):
+    def __init__(self, project_name="opensimrl",
+                 experiment_name=None, config=None):
+
         self.use_wandb = True
         try:
             wandb.init(
@@ -18,7 +20,7 @@ class ExperimentLogger:
         except Exception as e:
             print(f"W&B initialization failed: {e}")
             self.use_wandb = False
-    
+
     def log_metrics(self, metrics, step=None):
         """Logs metrics to W&B and print to console."""
         if self.use_wandb:

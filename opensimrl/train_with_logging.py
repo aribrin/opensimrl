@@ -4,6 +4,7 @@ from opensimrl.envs.gridworld import SimpleGridWorld
 from opensimrl.algorithms.ppo import SimplePPO
 from opensimrl.core.logger import ExperimentLogger
 
+
 def train(episodes=1000, log_interval=100):
     """Enhanced training loop for PPO on GridWorld with logging."""
 
@@ -35,7 +36,7 @@ def train(episodes=1000, log_interval=100):
         # Collect trajectory
         observations, actions, rewards, probababilities = [], [], [], []
 
-        for step in range(100): # max 100 steps per episode
+        for step in range(100):  # max 100 steps per episode
             action, probability = agent.get_action(observation)
             next_observation, reward, done, _, _ = env.step(action)
 
@@ -50,20 +51,26 @@ def train(episodes=1000, log_interval=100):
             if done:
                 break
 
-
         # Update agent
         if len(observations) > 0:
-            pol_loss, val_loss = agent.update(observations, actions, rewards, probababilities)
+            pol_loss, val_loss = agent.update(
+                observations, actions, rewards, probababilities
+            )
             policy_losses.append(pol_loss)
             value_losses.append(val_loss)
-
 
         episode_rewards.append(episode_reward)
 
         if episode % log_interval == 0:
             avg_reward = np.mean(episode_rewards[-log_interval:])
-            avg_pol_loss = np.mean(policy_losses[-log_interval:]) if policy_losses else 0
-            avg_val_loss = np.mean(value_losses[-log_interval:]) if value_losses else 0
+            avg_pol_loss = (
+                np.mean(policy_losses[-log_interval:])
+                if policy_losses else 0
+            )
+            avg_val_loss = (
+                np.mean(value_losses[-log_interval:])
+                if value_losses else 0
+            )
 
             logger.log_metrics({
                 "episode_reward": episode_reward,
@@ -84,13 +91,15 @@ def train(episodes=1000, log_interval=100):
 
     # Moving average reward
     window = 50
-    moving_avg = np.convolve(episode_rewards, np.ones(window)/window, mode='valid')
+    moving_avg = np.convolve(
+        episode_rewards, np.ones(window) / window, mode='valid'
+    )
     ax2.plot(moving_avg)
     ax2.set_title(f'Moving Average Reward (window={window} episodes)')
     ax2.set_xlabel('Episode')
     ax2.set_ylabel('Average Reward')
 
-    #Losses
+    # Losses
     if policy_losses:
         ax3.plot(policy_losses)
         ax3.set_title('Policy Loss')
@@ -112,7 +121,7 @@ def train(episodes=1000, log_interval=100):
 
 def evaluate_agent(agent, env, num_episodes=10):
     """Evaluate trained agent"""
-    
+
     total_rewards = []
     success_rate = 0
 
@@ -125,12 +134,12 @@ def evaluate_agent(agent, env, num_episodes=10):
             observation, reward, done, _, _ = env.step(action)
             episode_reward += reward
 
-            if done and reward > 0: # reached goal
+            if done and reward > 0:  # reached goal
                 success_rate += 1
                 break
-        
+
         total_rewards.append(episode_reward)
-    
+
     return {
         "average_reward": np.mean(total_rewards),
         "standard_reward": np.std(total_rewards),
@@ -149,6 +158,7 @@ if __name__ == "__main__":
 
     # Quick evaluation
     env = SimpleGridWorld()
-    agent = SimplePPO(observation_dim=2, action_dim=4) # In practice, load trained weights
-    
+    agent = SimplePPO(observation_dim=2, action_dim=4)
+    # Note: In practice load trained weights
+
     print("\n🔍 Check your W&B dashboard for detailed logs!")

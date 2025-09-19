@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from opensimrl.envs.gridworld import SimpleGridWorld
 from opensimrl.algorithms.ppo import SimplePPO
 
+
 def train(episodes=1000):
     """Simple training loop for PPO on GridWorld."""
 
@@ -18,7 +19,7 @@ def train(episodes=1000):
         # Collect trajectory
         observations, actions, rewards, probababilities = [], [], [], []
 
-        for step in range(100): # max 100 steps per episode
+        for step in range(100):  # max 100 steps per episode
             action, probability = agent.get_action(observation)
             next_observation, reward, done, _, _ = env.step(action)
 
@@ -32,7 +33,6 @@ def train(episodes=1000):
 
             if done:
                 break
-
 
         # Update agent
         if len(observations) > 0:

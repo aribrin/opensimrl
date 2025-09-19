@@ -1,6 +1,6 @@
-import torch 
+import torch
 import torch.nn.functional as F
-import numpy as np
+# import numpy as np
 from opensimrl.core.networks import PolicyNetwork, ValueNetwork
 
 
@@ -10,7 +10,9 @@ class SimplePPO:
     def __init__(self, observation_dim, action_dim, lr=3e-4):
         self.policy = PolicyNetwork(observation_dim, action_dim)
         self.value = ValueNetwork(observation_dim)
-        self.policy_optimizer = torch.optim.Adam(self.policy.parameters(), lr=lr)
+        self.policy_optimizer = torch.optim.Adam(
+            self.policy.parameters(), lr=lr
+        )
         self.value_optimizer = torch.optim.Adam(self.value.parameters(), lr=lr)
 
     def get_action(self, observation):
@@ -32,7 +34,9 @@ class SimplePPO:
         advantages = rewards - values.detach()
 
         # PPO policy update
-        new_probabilities = self.policy(observations).gather(1, actions.unsqueeze(1)).squeeze(1)
+        new_probabilities = self.policy(observations).gather(
+            1, actions.unsqueeze(1)
+        ).squeeze(1)
         ratio = new_probabilities / old_probabilities_tensor
         policy_loss = -torch.min(
             ratio * advantages,
