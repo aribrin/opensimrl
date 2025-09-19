@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from opensimrl.envs.gridworld import SimpleGridWorld
 from opensimrl.algorithms.ppo import SimplePPO
 
-def train_ppo_gridworld(episodes=1000):
+def train(episodes=1000):
     """Simple training loop for PPO on GridWorld."""
 
     env = SimpleGridWorld()
@@ -48,7 +48,7 @@ def train_ppo_gridworld(episodes=1000):
 
 
 if __name__ == "__main__":
-    rewards = train_ppo_gridworld()
+    rewards = train()
 
     # Plot results
     plt.plot(rewards)
