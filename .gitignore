@@ -11,12 +11,19 @@ venv/
 *.log
 *.png
 
-#WandB
+### Outputs from training ###
+
+# hydra outputs
+outputs/ 
+
+# WandB
 */wandb
 
-#Mlflow
+# Mlflow
 mlruns/
 
-#artifacts/
+# artifacts/
 artifacts/
 
+# Memory Bank
+/MEMORY

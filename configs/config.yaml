@@ -1,0 +1,15 @@
+# Hydra top-level config for OpenSimRL
+# Run with: python -m opensimrl.train
+# Override examples:
+#   - python -m opensimrl.train algorithm.epochs=5 algorithm.steps_per_epoch=1000
+#   - python -m opensimrl.train env=gridworld env.size=5
+#   - python -m opensimrl.train -m seed=0,1,2
+#   - python -m opensimrl.train logger=mlflow logger.experiment_name=cartpole
+
+defaults:
+  - algorithm: ppo
+  - env: cartpole
+  - logger: console
+
+# You can optionally put shared/top-level settings here later if needed.
+# For now, all settings live under the grouped configs above.
