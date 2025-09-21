@@ -16,3 +16,7 @@ venv/
 
 #Mlflow
 mlruns/
+
+#artifacts/
+artifacts/
+

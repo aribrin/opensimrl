@@ -1,53 +1,51 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from opensimrl.envs import CartPoleEnv
-from opensimrl.algorithms.simple_ppo import SimplePPO
+import gymnasium as gym
+
+from opensimrl.algorithms.ppo import ppo
 
 
-def train_cartpole(episodes=1000):
-    """Train a PPO agent on the CartPole environment"""
-    env = CartPoleEnv()
-    agent = SimplePPO(observation_dim=4, action_dim=2)
+def train_cartpole(
+    epochs=50,
+    steps_per_epoch=4000,
+    seed=0,
+    gamma=0.99,
+    hidden_sizes=(64, 64),
+):
+    """
+    Train PPO on CartPole-v1 using the integrated PPO training loop.
 
-    episode_rewards = []
+    Returns:
+        history (list[float]): Mean episodic return per epoch (for plotting).
+    """
 
-    for episode in range(episodes):
-        observation, _ = env.reset()
-        episode_reward = 0
-        observations, actions, rewards, probabilities = [], [], [], []
+    def make_env():
+        return gym.make("CartPole-v1")
 
-        for step in range(500):  # CartPole max steps per episode
-            action, probability = agent.get_action(observation)
-            next_observation, reward, done, _, _ = env.step(action)
+    logger_kwargs = {
+        "experiment_name": "cartpole",
+        "run_name": f"ppo_cartpole_s{seed}",
+    }
 
-            observations.append(observation)
-            actions.append(action)
-            rewards.append(reward)
-            probabilities.append(probability)
+    history = ppo(
+        env_fn=make_env,
+        ac_kwargs=dict(hidden_sizes=list(hidden_sizes)),
+        seed=seed,
+        steps_per_epoch=steps_per_epoch,
+        epochs=epochs,
+        gamma=gamma,
+        logger_kwargs=logger_kwargs,
+        return_history=True,
+    )
 
-            episode_reward += reward
-            observation = next_observation
-
-            if done:
-                break
-
-        if len(observations) > 0:
-            agent.update(observations, actions, rewards, probabilities)
-
-        episode_rewards.append(episode_reward)
-
-        if episode % 100 == 0:
-            avg_reward = np.mean(episode_rewards[-100:])
-            print(f"Episode {episode}, Average Reward: {avg_reward:.2f}")
-
-    return episode_rewards
+    return history
 
 
 if __name__ == "__main__":
-    rewards = train_cartpole()
+    rewards = train_cartpole(epochs=50, steps_per_epoch=4000, seed=0)
+
     plt.plot(rewards)
-    plt.title('PPO Training on CartPole')
-    plt.xlabel('Episode')
-    plt.ylabel('Reward')
-    plt.savefig('cartpole_training_results.png')
+    plt.title("PPO Training on CartPole (Mean Return per Epoch)")
+    plt.xlabel("Epoch")
+    plt.ylabel("Mean Episode Return")
+    plt.savefig("cartpole_training_results.png")
     plt.show()

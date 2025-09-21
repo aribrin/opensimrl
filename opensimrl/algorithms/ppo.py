@@ -116,6 +116,7 @@ def ppo(
     target_kl=0.01,
     logger_kwargs=dict(),
     save_freq=10,
+    return_history=False,
 ):
     """
     Proximal Policy Optimization (by clipping).
@@ -144,6 +145,8 @@ def ppo(
         raise NotImplementedError("Unsupported action space type.")
 
     # Actor-Critic
+    if actor_critic is None:
+        actor_critic = core.MLPActorCritic
     ac = actor_critic(env.observation_space, env.action_space, **ac_kwargs)
 
     # Experience buffer
@@ -266,6 +269,7 @@ def ppo(
     ep_ret, ep_len = 0.0, 0
     ep_returns, ep_lengths = [], []
     vvals_epoch = []
+    history = []
 
     for epoch in range(epochs):
         for t in range(local_steps_per_epoch):
@@ -349,6 +353,8 @@ def ppo(
         vval_mean = (
             float(np.mean(vvals_epoch)) if len(vvals_epoch) else 0.0
         )
+        if return_history:
+            history.append(ep_ret_mean)
         total_interacts = (epoch + 1) * steps_per_epoch
         epoch_time = time.time() - start_time
 
@@ -415,6 +421,9 @@ def ppo(
             mlflow.end_run()
         except Exception as e:
             print(f"Failed to end MLflow run: {e}")
+
+    if return_history:
+        return history
 
 
 if __name__ == "__main__":
