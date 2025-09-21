@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from opensimrl.envs.gridworld import SimpleGridWorld
-from opensimrl.algorithms.ppo import SimplePPO
+from opensimrl.algorithms.simple_ppo import SimplePPO
 from opensimrl.core.logger import ExperimentLogger
 
 

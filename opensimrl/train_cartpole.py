@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from opensimrl.envs import CartPoleEnv
-from opensimrl.algorithms.ppo import SimplePPO
+from opensimrl.algorithms.simple_ppo import SimplePPO
 
 
 def train_cartpole(episodes=1000):

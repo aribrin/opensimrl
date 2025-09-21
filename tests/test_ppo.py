@@ -1,7 +1,7 @@
 # import pytest
 # import torch
 import numpy as np
-from opensimrl.algorithms.ppo import SimplePPO
+from opensimrl.algorithms.simple_ppo import SimplePPO
 
 
 def test_ppo_initialization():

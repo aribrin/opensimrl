@@ -13,3 +13,6 @@ venv/
 
 #WandB
 */wandb
+
+#Mlflow
+mlruns/
