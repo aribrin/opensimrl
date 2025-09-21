@@ -1,3 +1,14 @@
+"""
+Attribution:
+Portions of this file are adapted from OpenAI Spinning Up in Deep RL (PPO).
+
+- https://spinningup.openai.com
+- https://github.com/openai/spinningup
+
+Copyright (c) 2018 OpenAI
+Licensed under the MIT License. See THIRD_PARTY_NOTICES.md for details.
+"""
+
 import numpy as np
 import scipy.signal
 from gymnasium.spaces import Box, Discrete

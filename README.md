@@ -2,6 +2,19 @@
 
 A scalable reinforcement learning simulation framework built with PyTorch, designed for research and production.
 
+## Attribution
+
+This project includes adapted implementations of Proximal Policy Optimization (PPO) based on OpenAI Spinning Up in Deep RL.
+
+- Website: https://spinningup.openai.com
+- Repository: https://github.com/openai/spinningup
+
+Files adapted (so far):
+- opensimrl/core/ppo_core.py
+- opensimrl/algorithms/ppo.py
+
+See THIRD_PARTY_NOTICES.md for license details and the full MIT license text from OpenAI Spinning Up.
+
 ## Features
 
 - 🧠 **Modern RL Algorithms**: PPO, SAC, Dreamer (planned)
