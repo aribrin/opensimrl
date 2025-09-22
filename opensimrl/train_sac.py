@@ -94,6 +94,50 @@ def train_sac_pendulum_fast(
     return None
 
 
+def train_sac_HalfCheetah(
+    epochs=100,
+    steps_per_epoch=5000,
+    seed=0,
+    gamma=0.99,
+    hidden_sizes=(256, 256),
+    lr=3e-4,
+    batch_size=256,
+    start_steps=10000,
+    num_test_episodes=5,
+    logger_kind="console",
+):
+    """
+    Train SAC on HalfCheetah-v4 (continuous-control MuJoCo environment).
+    """
+    env_name = "HalfCheetah-v4"
+
+    def make_env():
+        return gym.make(env_name)
+
+    logger_kwargs = {
+        "experiment_name": "sac",
+        "run_name": f"sac_{env_name}_s{seed}",
+    }
+
+    sac(
+        env_fn=make_env,
+        actor_critic=core.MLPActorCritic,
+        ac_kwargs=dict(hidden_sizes=list(hidden_sizes)),
+        seed=seed,
+        steps_per_epoch=steps_per_epoch,
+        epochs=epochs,
+        gamma=gamma,
+        lr=lr,
+        batch_size=batch_size,
+        start_steps=start_steps,
+        num_test_episodes=num_test_episodes,
+        logger_kind=logger_kind,
+        logger_kwargs=logger_kwargs,
+    )
+
+    return None
+
+
 if __name__ == "__main__":
     # Default run on Pendulum-v1 to ensure a Box action space for SAC.
     train_sac_pendulum(
@@ -103,3 +147,5 @@ if __name__ == "__main__":
         env_id=None,
         logger_kind="console",
     )
+    # Example: Uncomment to run HalfCheetah training
+    # train_sac_HalfCheetah()
