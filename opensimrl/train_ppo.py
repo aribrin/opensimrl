@@ -4,7 +4,7 @@ import gymnasium as gym
 from opensimrl.algorithms.ppo import ppo
 
 
-def train_cartpole(
+def train_ppo_cartpole(
     epochs=50,
     steps_per_epoch=4000,
     seed=0,
@@ -41,7 +41,7 @@ def train_cartpole(
 
 
 if __name__ == "__main__":
-    rewards = train_cartpole(epochs=50, steps_per_epoch=4000, seed=0)
+    rewards = train_ppo_cartpole(epochs=50, steps_per_epoch=4000, seed=0)
 
     plt.plot(rewards)
     plt.title("PPO Training on CartPole (Mean Return per Epoch)")
