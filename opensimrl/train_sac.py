@@ -11,6 +11,7 @@ def train_sac_pendulum(
     gamma=0.99,
     hidden_sizes=(256, 256),
     env_id=None,
+    logger_kind="console",
 ):
     """
     Train SAC on a continuous-control environment.
@@ -37,6 +38,7 @@ def train_sac_pendulum(
         steps_per_epoch=steps_per_epoch,
         epochs=epochs,
         gamma=gamma,
+        logger_kind=logger_kind,
         logger_kwargs=logger_kwargs,
     )
 
@@ -54,6 +56,7 @@ def train_sac_pendulum_fast(
     batch_size=256,
     start_steps=5000,
     num_test_episodes=3,
+    logger_kind="console",
 ):
     """
     Faster SAC training config for Pendulum.
@@ -84,6 +87,7 @@ def train_sac_pendulum_fast(
         batch_size=batch_size,
         start_steps=start_steps,
         num_test_episodes=num_test_episodes,
+        logger_kind=logger_kind,
         logger_kwargs=logger_kwargs,
     )
 
@@ -97,4 +101,5 @@ if __name__ == "__main__":
         steps_per_epoch=4000,
         seed=0,
         env_id=None,
+        logger_kind="console",
     )

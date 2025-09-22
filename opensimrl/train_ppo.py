@@ -10,6 +10,7 @@ def train_ppo_cartpole(
     seed=0,
     gamma=0.99,
     hidden_sizes=(64, 64),
+    logger_kind="console",
 ):
     """
     Train PPO on CartPole-v1 using the integrated PPO training loop.
@@ -33,6 +34,7 @@ def train_ppo_cartpole(
         steps_per_epoch=steps_per_epoch,
         epochs=epochs,
         gamma=gamma,
+        logger_kind=logger_kind,
         logger_kwargs=logger_kwargs,
         return_history=True,
     )
@@ -41,7 +43,7 @@ def train_ppo_cartpole(
 
 
 if __name__ == "__main__":
-    rewards = train_ppo_cartpole(epochs=50, steps_per_epoch=4000, seed=0)
+    rewards = train_ppo_cartpole(epochs=50, steps_per_epoch=4000, seed=0, logger_kind="console")
 
     plt.plot(rewards)
     plt.title("PPO Training on CartPole (Mean Return per Epoch)")

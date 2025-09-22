@@ -22,10 +22,27 @@ Train on any Gymnasium environment by ID (default is CartPole-v1):
 python -m opensimrl.train env.name=CartPole-v1
 ```
 
-## 3) Enable MLflow (optional)
-If MLflow is installed, you can select the MLflow logger config:
+## 3) Select a Logging Backend (Console, MLflow, or W&B)
+By default, runs log to the console and save checkpoints locally. You can switch the experiment logger at runtime:
+
+- MLflow:
 ```bash
 python -m opensimrl.train logger=mlflow logger.experiment_name=cartpole
+# Optional: set configs/logger/mlflow.yaml: tracking_uri: http://localhost:5000
+```
+
+- Weights & Biases:
+```bash
+wandb login
+python -m opensimrl.train logger=wandb logger.project_name=opensimrl logger.run_name=ppo
+```
+
+- Module CLIs:
+```bash
+# PPO
+python -m opensimrl.algorithms.ppo --logger wandb --env CartPole-v1 --epochs 1 --steps 200
+# SAC
+python -m opensimrl.algorithms.sac --logger mlflow --env Pendulum-v1 --epochs 1
 ```
 
 ## 4) Multirun Sweeps (Hydra)
@@ -44,9 +61,13 @@ You can still run training in notebooks without Hydra by calling a helper script
 For example, the repository includes a CartPole training utility:
 
 ```python
-from opensimrl.train_cartpole import train_cartpole
+from opensimrl.train_ppo import train_ppo_cartpole
 
-history = train_cartpole(epochs=5, steps_per_epoch=1000, seed=0)
+# Console logging (default)
+history = train_ppo_cartpole(epochs=5, steps_per_epoch=1000, seed=0, logger_kind="console")
+
+# Or use W&B
+# history = train_ppo_cartpole(epochs=5, steps_per_epoch=1000, seed=0, logger_kind="wandb")
 ```
 
 Plot the training curve:
@@ -67,4 +88,5 @@ pytest tests/
 
 Notes:
 - Hydra composes configurations from the `configs/` directory and creates a unique working directory per run. Checkpoints and artifacts will be stored under each run directory by default.
-- The PPO implementation supports both discrete and continuous action spaces and includes optional MLflow logging.
+- PPO supports both discrete and continuous action spaces.
+- Logging backends are selectable: console (default), MLflow, or W&B. If a backend is unavailable, the run safely falls back to console logging. Metrics use TotalEnvInteracts as the logging step.

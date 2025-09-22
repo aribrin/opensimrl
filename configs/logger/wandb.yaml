@@ -1,0 +1,7 @@
+# Logger configuration: Weights & Biases
+# Select with: python -m opensimrl.train logger=wandb
+kind: wandb
+# W&B "project" name; override via CLI: logger.project_name=myproj
+project_name: opensimrl
+# Run name appears in W&B UI
+run_name: ppo

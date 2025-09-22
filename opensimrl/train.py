@@ -55,14 +55,22 @@ def main(cfg: DictConfig) -> None:
             cfg.algorithm.ac_kwargs, resolve=True
         )  # type: ignore
 
-    # Logger kwargs (used for MLflow if available)
+    # Logger backend + kwargs
+    logger_kind = "console"
     logger_kwargs = {}
     if "logger" in cfg:
+        # kind: console | mlflow | wandb
+        logger_kind = str(getattr(cfg.logger, "kind", "console"))
+        # Common names
         if "experiment_name" in cfg.logger and "run_name" in cfg.logger:
-            logger_kwargs = {
-                "experiment_name": cfg.logger.experiment_name,
-                "run_name": cfg.logger.run_name,
-            }
+            logger_kwargs["experiment_name"] = cfg.logger.experiment_name
+            logger_kwargs["run_name"] = cfg.logger.run_name
+        # MLflow optional tracking URI
+        if "tracking_uri" in cfg.logger:
+            logger_kwargs["tracking_uri"] = cfg.logger.tracking_uri
+        # W&B project name (if provided)
+        if "project_name" in cfg.logger:
+            logger_kwargs["project_name"] = cfg.logger.project_name
 
     # Launch PPO
     ppo(
@@ -81,6 +89,7 @@ def main(cfg: DictConfig) -> None:
         lam=float(cfg.algorithm.lam),
         max_ep_len=int(cfg.algorithm.max_ep_len),
         target_kl=float(cfg.algorithm.target_kl),
+        logger_kind=logger_kind,
         logger_kwargs=logger_kwargs,
         save_freq=int(cfg.algorithm.save_freq),
         return_history=bool(cfg.algorithm.return_history),

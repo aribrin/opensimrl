@@ -18,6 +18,7 @@ outputs/
 
 # WandB
 */wandb
+/wandb/
 
 # Mlflow
 mlruns/

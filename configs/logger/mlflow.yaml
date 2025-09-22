@@ -1,6 +1,6 @@
 # Logger configuration: MLflow (if installed)
 # Select with: python -m opensimrl.train logger=mlflow
-# ppo.py will attempt to initialize MLflow if available.
+kind: mlflow
 experiment_name: opensimrl
 run_name: ppo
 # Optional: you can add tracking_uri if using a remote/local server

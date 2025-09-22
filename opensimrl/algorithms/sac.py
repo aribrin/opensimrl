@@ -20,13 +20,7 @@ import gymnasium as gym
 
 # Local SAC core (networks / utils)
 import opensimrl.core.sac_core as core
-
-# Optional MLflow integration (mirrors opensimrl.algorithms.ppo)
-try:
-    import mlflow
-except Exception as e:
-    mlflow = None
-    print(f"MLflow not available: {e}")
+from opensimrl.core.run_logger import create_run_logger
 
 
 class ReplayBuffer:
@@ -85,6 +79,7 @@ def sac(
     update_every=50,
     num_test_episodes=10,
     max_ep_len=1000,
+    logger_kind="console",
     logger_kwargs=dict(),
     save_freq=1,
 ):
@@ -190,42 +185,36 @@ def sac(
     pi_optimizer = Adam(ac.pi.parameters(), lr=lr)
     q_optimizer = Adam(q_params, lr=lr)
 
-    # MLflow setup
-    run_started = False
+    # Run logger setup
     exp_name = (
         logger_kwargs.get("experiment_name")
         or logger_kwargs.get("exp_name")
+        or logger_kwargs.get("project_name")
         or "opensimrl"
     )
     run_name = logger_kwargs.get("run_name") or "sac"
-    if mlflow is not None:
-        try:
-            mlflow.set_experiment(exp_name)
-            mlflow.start_run(run_name=run_name)
-            run_started = True
-            # Log parameters
-            mlflow.log_params(
-                {
-                    "algo": "SAC",
-                    "gamma": gamma,
-                    "polyak": polyak,
-                    "lr": lr,
-                    "alpha": alpha,
-                    "batch_size": batch_size,
-                    "start_steps": start_steps,
-                    "update_after": update_after,
-                    "update_every": update_every,
-                    "num_test_episodes": num_test_episodes,
-                    "max_ep_len": max_ep_len,
-                    "steps_per_epoch": steps_per_epoch,
-                    "epochs": epochs,
-                    "replay_size": replay_size,
-                    "seed": seed,
-                    "ac_hidden_sizes": str(ac_kwargs.get("hidden_sizes", None)),
-                }
-            )
-        except Exception as e:
-            print(f"MLflow initialization failed: {e}")
+    run_logger = create_run_logger(logger_kind, **logger_kwargs)
+    run_logger.start(exp_name, run_name)
+    run_logger.log_params(
+        {
+            "algo": "SAC",
+            "gamma": gamma,
+            "polyak": polyak,
+            "lr": lr,
+            "alpha": alpha,
+            "batch_size": batch_size,
+            "start_steps": start_steps,
+            "update_after": update_after,
+            "update_every": update_every,
+            "num_test_episodes": num_test_episodes,
+            "max_ep_len": max_ep_len,
+            "steps_per_epoch": steps_per_epoch,
+            "epochs": epochs,
+            "replay_size": replay_size,
+            "seed": seed,
+            "ac_hidden_sizes": str(ac_kwargs.get("hidden_sizes", None)),
+        }
+    )
 
     def update(data):
         # Q update
@@ -349,11 +338,10 @@ def sac(
                     os.makedirs(save_dir, exist_ok=True)
                     model_path = os.path.join(save_dir, f"sac_ac_epoch_{epoch}.pt")
                     torch.save(ac.state_dict(), model_path)
-                    if mlflow is not None and run_started:
-                        try:
-                            mlflow.log_artifact(model_path, artifact_path="models")
-                        except Exception as e:
-                            print(f"Failed to log artifact to MLflow: {e}")
+                    try:
+                        run_logger.log_artifact(model_path, artifact_path="models")
+                    except Exception as e:
+                        print(f"Failed to log artifact: {e}")
                 except Exception as e:
                     print(f"Failed to save model: {e}")
 
@@ -402,26 +390,25 @@ def sac(
             )
             print(log_line)
 
-            # MLflow log
-            if mlflow is not None and run_started:
-                try:
-                    mlflow.log_metrics(
-                        {
-                            "EpRetMean": metrics["EpRetMean"],
-                            "EpLenMean": metrics["EpLenMean"],
-                            "TestEpRetMean": metrics["TestEpRetMean"],
-                            "TestEpLenMean": metrics["TestEpLenMean"],
-                            "LossQ": metrics["LossQ"],
-                            "LossPi": metrics["LossPi"],
-                            "Q1Mean": metrics["Q1Mean"],
-                            "Q2Mean": metrics["Q2Mean"],
-                            "LogPiMean": metrics["LogPiMean"],
-                            "Time": metrics["Time"],
-                        },
-                        step=total_interacts,
-                    )
-                except Exception as e:
-                    print(f"Failed to log metrics to MLflow: {e}")
+            # Run logger metrics
+            try:
+                run_logger.log_metrics(
+                    {
+                        "EpRetMean": metrics["EpRetMean"],
+                        "EpLenMean": metrics["EpLenMean"],
+                        "TestEpRetMean": metrics["TestEpRetMean"],
+                        "TestEpLenMean": metrics["TestEpLenMean"],
+                        "LossQ": metrics["LossQ"],
+                        "LossPi": metrics["LossPi"],
+                        "Q1Mean": metrics["Q1Mean"],
+                        "Q2Mean": metrics["Q2Mean"],
+                        "LogPiMean": metrics["LogPiMean"],
+                        "Time": metrics["Time"],
+                    },
+                    step=total_interacts,
+                )
+            except Exception as e:
+                print(f"Failed to log metrics: {e}")
 
             # Reset epoch accumulators
             train_ep_returns_epoch.clear()
@@ -432,12 +419,11 @@ def sac(
             upd_q2_epoch.clear()
             upd_logpi_epoch.clear()
 
-    # Finalize MLflow
-    if mlflow is not None and run_started:
-        try:
-            mlflow.end_run()
-        except Exception as e:
-            print(f"Failed to end MLflow run: {e}")
+    # Finalize logger
+    try:
+        run_logger.end()
+    except Exception as e:
+        print(f"Failed to finalize run logger: {e}")
 
 
 if __name__ == "__main__":
@@ -451,6 +437,13 @@ if __name__ == "__main__":
     parser.add_argument("--seed", "-s", type=int, default=0)
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--exp_name", type=str, default="sac")
+    parser.add_argument(
+        "--logger",
+        type=str,
+        default="mlflow",
+        choices=["console", "mlflow", "wandb"],
+        help="Logging backend to use",
+    )
     args = parser.parse_args()
 
     # Logger kwargs for MLflow
@@ -471,5 +464,6 @@ if __name__ == "__main__":
         gamma=args.gamma,
         seed=args.seed,
         epochs=args.epochs,
+        logger_kind=args.logger,
         logger_kwargs=logger_kwargs,
     )

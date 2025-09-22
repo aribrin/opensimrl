@@ -1,2 +1,2 @@
-# Environment configuration: CartPole via Gymnasium
+# Environment: Gymnasium CartPole
 name: CartPole-v1

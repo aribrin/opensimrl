@@ -19,13 +19,7 @@ from gymnasium.spaces import Discrete, Box
 
 # Replace spinup core with local PPO core
 from opensimrl.core import ppo_core as core
-
-# Optional MLflow integration
-try:
-    import mlflow
-except Exception as e:
-    mlflow = None
-    print(f"MLflow not available: {e}")
+from opensimrl.core.run_logger import create_run_logger
 
 
 class PPOBuffer:
@@ -125,6 +119,7 @@ def ppo(
     lam=0.97,
     max_ep_len=1000,
     target_kl=0.01,
+    logger_kind="console",
     logger_kwargs=dict(),
     save_freq=10,
     return_history=False,
@@ -199,37 +194,32 @@ def ppo(
     pi_optimizer = Adam(ac.pi.parameters(), lr=pi_lr)
     vf_optimizer = Adam(ac.v.parameters(), lr=vf_lr)
 
-    # MLflow setup
-    run_started = False
+    # Run logger setup
     exp_name = (
         logger_kwargs.get("experiment_name")
         or logger_kwargs.get("exp_name")
+        or logger_kwargs.get("project_name")
         or "opensimrl"
     )
     run_name = logger_kwargs.get("run_name") or "ppo"
-    if mlflow is not None:
-        try:
-            mlflow.set_experiment(exp_name)
-            mlflow.start_run(run_name=run_name)
-            run_started = True
-            mlflow.log_params(
-                {
-                    "algo": "PPO",
-                    "gamma": gamma,
-                    "clip_ratio": clip_ratio,
-                    "pi_lr": pi_lr,
-                    "vf_lr": vf_lr,
-                    "train_pi_iters": train_pi_iters,
-                    "train_v_iters": train_v_iters,
-                    "lam": lam,
-                    "max_ep_len": max_ep_len,
-                    "steps_per_epoch": steps_per_epoch,
-                    "epochs": epochs,
-                    "seed": seed,
-                }
-            )
-        except Exception as e:
-            print(f"MLflow initialization failed: {e}")
+    run_logger = create_run_logger(logger_kind, **logger_kwargs)
+    run_logger.start(exp_name, run_name)
+    run_logger.log_params(
+        {
+            "algo": "PPO",
+            "gamma": gamma,
+            "clip_ratio": clip_ratio,
+            "pi_lr": pi_lr,
+            "vf_lr": vf_lr,
+            "train_pi_iters": train_pi_iters,
+            "train_v_iters": train_v_iters,
+            "lam": lam,
+            "max_ep_len": max_ep_len,
+            "steps_per_epoch": steps_per_epoch,
+            "epochs": epochs,
+            "seed": seed,
+        }
+    )
 
     def update():
         data = buf.get()
@@ -341,13 +331,10 @@ def ppo(
                     save_dir, f"ppo_ac_epoch_{epoch}.pt"
                 )
                 torch.save(ac.state_dict(), model_path)
-                if mlflow is not None and run_started:
-                    try:
-                        mlflow.log_artifact(
-                            model_path, artifact_path="models"
-                        )
-                    except Exception as e:
-                        print(f"Failed to log artifact to MLflow: {e}")
+                try:
+                    run_logger.log_artifact(model_path, artifact_path="models")
+                except Exception as e:
+                    print(f"Failed to log artifact: {e}")
             except Exception as e:
                 print(f"Failed to save model: {e}")
 
@@ -402,36 +389,34 @@ def ppo(
         )
         print(log_line)
 
-        # MLflow log
-        if mlflow is not None and run_started:
-            try:
-                # Use TotalEnvInteracts as step for consistent x-axis
-                mlflow.log_metrics(
-                    {
-                        "EpRetMean": metrics["EpRetMean"],
-                        "EpLenMean": metrics["EpLenMean"],
-                        "VValsMean": metrics["VValsMean"],
-                        "LossPi": metrics["LossPi"],
-                        "LossV": metrics["LossV"],
-                        "DeltaLossPi": metrics["DeltaLossPi"],
-                        "DeltaLossV": metrics["DeltaLossV"],
-                        "Entropy": metrics["Entropy"],
-                        "KL": metrics["KL"],
-                        "ClipFrac": metrics["ClipFrac"],
-                        "StopIter": float(metrics["StopIter"]),
-                        "Time": metrics["Time"],
-                    },
-                    step=total_interacts,
-                )
-            except Exception as e:
-                print(f"Failed to log metrics to MLflow: {e}")
-
-    # Finalize MLflow
-    if mlflow is not None and run_started:
+        # Run logger metrics
         try:
-            mlflow.end_run()
+            # Use TotalEnvInteracts as step for consistent x-axis
+            run_logger.log_metrics(
+                {
+                    "EpRetMean": metrics["EpRetMean"],
+                    "EpLenMean": metrics["EpLenMean"],
+                    "VValsMean": metrics["VValsMean"],
+                    "LossPi": metrics["LossPi"],
+                    "LossV": metrics["LossV"],
+                    "DeltaLossPi": metrics["DeltaLossPi"],
+                    "DeltaLossV": metrics["DeltaLossV"],
+                    "Entropy": metrics["Entropy"],
+                    "KL": metrics["KL"],
+                    "ClipFrac": metrics["ClipFrac"],
+                    "StopIter": float(metrics["StopIter"]),
+                    "Time": metrics["Time"],
+                },
+                step=total_interacts,
+            )
         except Exception as e:
-            print(f"Failed to end MLflow run: {e}")
+            print(f"Failed to log metrics: {e}")
+
+    # Finalize logger
+    try:
+        run_logger.end()
+    except Exception as e:
+        print(f"Failed to finalize run logger: {e}")
 
     if return_history:
         return history
@@ -449,6 +434,13 @@ if __name__ == "__main__":
     parser.add_argument("--steps", type=int, default=4000)
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--exp_name", type=str, default="ppo")
+    parser.add_argument(
+        "--logger",
+        type=str,
+        default="console",
+        choices=["console", "mlflow", "wandb"],
+        help="Logging backend to use",
+    )
     args = parser.parse_args()
 
     # Logger kwargs for MLflow
@@ -468,5 +460,6 @@ if __name__ == "__main__":
         seed=args.seed,
         steps_per_epoch=args.steps,
         epochs=args.epochs,
+        logger_kind=args.logger,
         logger_kwargs=logger_kwargs,
     )

@@ -1,4 +1,5 @@
 # Logger configuration: console-only (safe defaults)
-# Note: PPO will use these names if MLflow is available.
+kind: console
+# Names used for local prints; some backends also use these
 experiment_name: opensimrl
 run_name: ppo
