@@ -48,9 +48,9 @@ def ppo(
   - wandb: {project_name, run_name}
 - return: if return_history=True, returns list[float] of per-epoch mean returns
 
-CLI (module):
+CLI (Hydra entrypoint):
 ```bash
-python -m opensimrl.algorithms.ppo --logger console|mlflow|wandb --env CartPole-v1 --epochs 1 --steps 200
+python -m opensimrl.train algorithm.epochs=1 algorithm.steps_per_epoch=200
 ```
 
 ### SAC (function)
@@ -83,9 +83,9 @@ def sac(
 - Supports continuous (Box) action spaces
 - Uses deterministic test episodes per epoch for evaluation
 
-CLI (module):
+CLI (Hydra entrypoint):
 ```bash
-python -m opensimrl.algorithms.sac --logger console|mlflow|wandb --env Pendulum-v1 --epochs 1
+python -m opensimrl.train algorithm=sac env.name=Pendulum-v1 algorithm.epochs=1
 ```
 
 ## Training Entry Points

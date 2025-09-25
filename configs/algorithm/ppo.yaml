@@ -1,6 +1,7 @@
 # PPO algorithm configuration
 # These map directly to opensimrl.algorithms.ppo.ppo(...) arguments.
 
+name: ppo
 seed: 0
 
 # Training schedule

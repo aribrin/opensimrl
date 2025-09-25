@@ -44,13 +44,9 @@ wandb login
 python -m opensimrl.train logger=wandb logger.project_name=opensimrl logger.run_name=ppo
 ```
 
-You can also select the backend when using the module CLIs:
+You can also run SAC via the unified Hydra entrypoint:
 ```bash
-# PPO (module CLI)
-python -m opensimrl.algorithms.ppo --logger wandb --env CartPole-v1 --epochs 1 --steps 200
-
-# SAC (module CLI)
-python -m opensimrl.algorithms.sac --logger mlflow --env Pendulum-v1 --epochs 1
+python -m opensimrl.train algorithm=sac env.name=Pendulum-v1
 ```
 
 Notes:

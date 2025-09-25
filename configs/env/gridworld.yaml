@@ -1,4 +1,3 @@
-# Environment: Internal SimpleGridWorld
+# Env config: SimpleGridWorld (Gymnasium-compatible custom env)
 name: gridworld
-# Size parameter consumed by opensimrl.envs.gridworld.SimpleGridWorld when selected in train.py
 size: 5

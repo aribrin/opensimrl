@@ -22,7 +22,8 @@ from omegaconf import DictConfig, OmegaConf
 import gymnasium as gym
 
 from opensimrl.algorithms.ppo import ppo
-from opensimrl.core import ppo_core as core
+from opensimrl.algorithms.sac import sac
+from opensimrl.core import ppo_core, sac_core
 from opensimrl.envs.gridworld import SimpleGridWorld
 
 
@@ -72,28 +73,53 @@ def main(cfg: DictConfig) -> None:
         if "project_name" in cfg.logger:
             logger_kwargs["project_name"] = cfg.logger.project_name
 
-    # Launch PPO
-    ppo(
-        env_fn=env_fn,
-        actor_critic=core.MLPActorCritic,
-        ac_kwargs=ac_kwargs,
-        seed=int(cfg.algorithm.seed),
-        steps_per_epoch=int(cfg.algorithm.steps_per_epoch),
-        epochs=int(cfg.algorithm.epochs),
-        gamma=float(cfg.algorithm.gamma),
-        clip_ratio=float(cfg.algorithm.clip_ratio),
-        pi_lr=float(cfg.algorithm.pi_lr),
-        vf_lr=float(cfg.algorithm.vf_lr),
-        train_pi_iters=int(cfg.algorithm.train_pi_iters),
-        train_v_iters=int(cfg.algorithm.train_v_iters),
-        lam=float(cfg.algorithm.lam),
-        max_ep_len=int(cfg.algorithm.max_ep_len),
-        target_kl=float(cfg.algorithm.target_kl),
-        logger_kind=logger_kind,
-        logger_kwargs=logger_kwargs,
-        save_freq=int(cfg.algorithm.save_freq),
-        return_history=bool(cfg.algorithm.return_history),
-    )
+    # Launch selected algorithm
+    algo_name = str(getattr(cfg.algorithm, "name", "ppo")).lower()
+    if algo_name == "sac":
+        sac(
+            env_fn=env_fn,
+            actor_critic=sac_core.MLPActorCritic,
+            ac_kwargs=ac_kwargs,
+            seed=int(cfg.algorithm.seed),
+            steps_per_epoch=int(cfg.algorithm.steps_per_epoch),
+            epochs=int(cfg.algorithm.epochs),
+            replay_size=int(cfg.algorithm.replay_size),
+            gamma=float(cfg.algorithm.gamma),
+            polyak=float(cfg.algorithm.polyak),
+            lr=float(cfg.algorithm.lr),
+            alpha=float(cfg.algorithm.alpha),
+            batch_size=int(cfg.algorithm.batch_size),
+            start_steps=int(cfg.algorithm.start_steps),
+            update_after=int(cfg.algorithm.update_after),
+            update_every=int(cfg.algorithm.update_every),
+            num_test_episodes=int(cfg.algorithm.num_test_episodes),
+            max_ep_len=int(cfg.algorithm.max_ep_len),
+            logger_kind=logger_kind,
+            logger_kwargs=logger_kwargs,
+            save_freq=int(cfg.algorithm.save_freq),
+        )
+    else:
+        ppo(
+            env_fn=env_fn,
+            actor_critic=ppo_core.MLPActorCritic,
+            ac_kwargs=ac_kwargs,
+            seed=int(cfg.algorithm.seed),
+            steps_per_epoch=int(cfg.algorithm.steps_per_epoch),
+            epochs=int(cfg.algorithm.epochs),
+            gamma=float(cfg.algorithm.gamma),
+            clip_ratio=float(cfg.algorithm.clip_ratio),
+            pi_lr=float(cfg.algorithm.pi_lr),
+            vf_lr=float(cfg.algorithm.vf_lr),
+            train_pi_iters=int(cfg.algorithm.train_pi_iters),
+            train_v_iters=int(cfg.algorithm.train_v_iters),
+            lam=float(cfg.algorithm.lam),
+            max_ep_len=int(cfg.algorithm.max_ep_len),
+            target_kl=float(cfg.algorithm.target_kl),
+            logger_kind=logger_kind,
+            logger_kwargs=logger_kwargs,
+            save_freq=int(cfg.algorithm.save_freq),
+            return_history=bool(getattr(cfg.algorithm, "return_history", False)),
+        )
 
 
 if __name__ == "__main__":

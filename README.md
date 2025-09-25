@@ -38,6 +38,9 @@ python -m opensimrl.train algorithm.epochs=5 algorithm.steps_per_epoch=1000
 # Switch environment to GridWorld (size configurable)
 python -m opensimrl.train env=gridworld env.size=5
 
+# Switch to SAC (continuous actions, e.g., Pendulum)
+python -m opensimrl.train algorithm=sac env.name=Pendulum-v1
+
 # Enable MLflow-configured run
 python -m opensimrl.train logger=mlflow logger.experiment_name=cartpole
 

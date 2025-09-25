@@ -11,5 +11,6 @@ defaults:
   - env: cartpole
   - logger: console
 
+seed: 0
 # You can optionally put shared/top-level settings here later if needed.
 # For now, all settings live under the grouped configs above.

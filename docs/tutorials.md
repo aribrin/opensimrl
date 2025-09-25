@@ -37,12 +37,9 @@ wandb login
 python -m opensimrl.train logger=wandb logger.project_name=opensimrl logger.run_name=ppo
 ```
 
-- Module CLIs:
+- SAC via unified entrypoint:
 ```bash
-# PPO
-python -m opensimrl.algorithms.ppo --logger wandb --env CartPole-v1 --epochs 1 --steps 200
-# SAC
-python -m opensimrl.algorithms.sac --logger mlflow --env Pendulum-v1 --epochs 1
+python -m opensimrl.train algorithm=sac env.name=Pendulum-v1
 ```
 
 ## 4) Multirun Sweeps (Hydra)

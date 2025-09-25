@@ -1,0 +1,27 @@
+algorithm:
+  name: ppo
+  seed: 0
+  steps_per_epoch: 4000
+  epochs: 50
+  max_ep_len: 1000
+  save_freq: 10
+  gamma: 0.99
+  lam: 0.97
+  clip_ratio: 0.2
+  target_kl: 0.01
+  pi_lr: 0.0003
+  vf_lr: 0.001
+  train_pi_iters: 80
+  train_v_iters: 80
+  ac_kwargs:
+    hidden_sizes:
+    - 64
+    - 64
+  return_history: true
+env:
+  name: CartPole-v1
+logger:
+  kind: console
+  experiment_name: opensimrl
+  run_name: ppo
+seed: 0
