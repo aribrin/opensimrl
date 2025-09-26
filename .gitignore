@@ -10,8 +10,12 @@ venv/
 .DS_Store
 *.log
 *.png
+.pre-commit-config.yaml
 
 ### Outputs from training ###
+
+# Multirun
+multirun/
 
 # hydra outputs
 outputs/ 
