@@ -18,8 +18,8 @@ See THIRD_PARTY_NOTICES.md for license details and the full MIT license text fro
 ## Features
 
 - 🧠 **Modern RL Algorithms**: PPO, SAC, Dreamer (planned)
-- 🌐 **Distributed Training**: Ray integration for scaling
-- ☁️ **Cloud Native**: Kubernetes & Argo Workflows support
+- 🌐 **Distributed Training**: Ray integration for scaling (planned)
+- ☁️ **Cloud Native**: Kubernetes & Argo Workflows support (planned)
 - 📊 Experiment Tracking: W&B or MLflow selectable via Hydra (logger=wandb | logger=mlflow)
 - 🔧 **Modular Design**: Easy to extend and customize
 - ⚙️ **Config-Driven**: Hydra-based configuration, CLI overrides, and multirun
